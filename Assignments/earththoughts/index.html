@@ -57,7 +57,7 @@
       
 
       <footer class="footer">
-        <p>&copy; 2016 Company, Inc.</p>
+        <p>&copy; CMPS 4443.</p>
       </footer>
 
     </div> <!-- /container -->
@@ -65,18 +65,17 @@
 
     <!-- scripts to run flask routes -->
     <script>
-        function getAnother(){
-          $.get( "http://localhost:5050/get_image", function( data ) {
-            
-                console.log(data.url)
-                $('#main_image').css('background-image','url('+data.url+')');
-            });
-
-            $.get("http://localhost:5050/get_quotes", function (quote) {
-                console.log(quote.url)
-                document.getElementById("quotes").innerHTML = quote.url;
-            });
-          }
+      function getAnother(){
+        $.get( "http://localhost:5050/get_image", function( data ) {
+          
+              console.log(data.url)
+              $('#main_image').css('background-image','url('+data.url+')');
+          });
+          $.get("http://localhost:5050/get_quotes", function (quote) {
+              console.log(quote.url)
+              document.getElementById("quotes").innerHTML = quote.url;
+          });
+        }
     </script>
   </body>
 </html>
