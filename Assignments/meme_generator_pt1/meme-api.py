@@ -133,8 +133,7 @@ def user(action=None):
    
     unique_vals = ['email','username']
     if action == 'new':
-        if request.method == "OPTIONS":
-
+       
         if request.method == "POST":     
             # create empty document 
             document = {
