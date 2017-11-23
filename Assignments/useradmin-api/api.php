@@ -183,6 +183,8 @@ class MyAPI extends API
         }
         return $results;
     }
+
+    
     private function flatten_array($array){
         foreach($array as $key => $value){
             //If $value is an array.
@@ -208,19 +210,36 @@ class MyAPI extends API
 
       * }
       */
-    protected function add_user(){
-        $this->mh->setDbcoll('users');
-        
-        if($this->method == "POST"){
-            
-            //insert at max id in the db
-            $max_id = $this->mh->get_max_id($this->mdb, $this->mh->collection, '_id');
-            $add_user = $this->request;
-            $add_user['_id'] = $max_id; //set max id for user to be added
-            $result = $this->mh->insert([$add_user]);
-            return $result;
-        }
-    }
+      protected function add_user()
+      {
+          $this->mh->setDbcoll('users');
+          if ($this->method == "POST"){
+              //not good implementation right now
+              if(array_key_exists('data',$this->request)){
+                  if(is_array($this->request['data'])){
+                      $this->request = $this->request['data'];
+                      //had issues with "posting" so I'm debugging here
+                      if(!$this->has_string_keys($this->request)){
+                          $this->request = $this->addPrimaryKey($this->request,$this->primary_key);
+                          $max_id = $this->mh->get_max_id($this->mdb, $this->mh->collection, '_id');
+                          $this->request['_id'] = $max_id;
+                          $result = $this->mh->insert([$this->request]);
+                      }else{
+                          $max_id = $this->mh->get_max_id($this->mdb, $this->mh->collection, '_id');
+                          $this->request['_id'] = $max_id;
+                          $result = $this->mh->insert([$this->request]);
+                      }
+                  }
+              }else{
+                  if(!isset($_GET['_id'])){
+                      $max_id = $this->mh->get_max_id($this->mdb, $this->mh->collection, '_id');
+                      $this->request['_id'] = $max_id;
+                  }
+                  $result = $this->mh->insert([$this->request]);
+                  return $result;
+              }
+          }
+      }
 
       /**
       * @name: update_user
@@ -233,18 +252,19 @@ class MyAPI extends API
 
       * }
       */
-    protected function update_user(){
-        $this->mh->setDbcoll('users');
-        
-        if($this->method == "POST"){
-            
-            //cast id to int to match value in db
-            $_id = (int)$this->request['_id'];
-            $upd_user['_id'] = $_id;
-            $result = $this->mh->update($upd_user, $this->request, null);
-            return $result;
-        }
-    }
+      protected function update_user()
+      {
+          $this->mh->setDbcoll('users');
+          if ($this->method == "POST"){
+              if(gettype($this->request["_id"])!="integer")
+              {
+                  $this->request["_id"] = (int)$this->request["_id"];
+              }
+              $this->mh->update(["_id" => $this->request["_id"]], $this->request);
+          }
+          return $this->request["_id"];
+      }
+  
 
     /**
      *  @name: delete_user
@@ -263,6 +283,13 @@ class MyAPI extends API
             $this->logger->do_log($this->request);
 
             if(count($this->request) > 0){
+                if(isset($_GET['_id']))
+                {
+                    if(gettype($this->request["_id"])!="integer")
+                    {
+                        $this->request["_id"] = (int)$this->request["_id"];
+                    }
+                }
                 $result = $this->mh->delete([$this->request]);
             }
             else{
@@ -370,3 +397,7 @@ $api = new MyAPI();
 echo $api->processAPI();
 
 exit;
+
+ 
+ 
+ 
